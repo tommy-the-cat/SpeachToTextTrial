@@ -7,8 +7,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.speech.RecognizerIntent;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,9 @@ import java.util.List;
 public class VoiceRecognitionActivity extends Activity {
 
     private static final int REQUEST_CODE = 1234;
-    private ListView wordsList;
+
+    ArrayList<String> matches;
+    private TextView speechTextView;
 
     /**
      * Called with the activity is first created.
@@ -29,8 +31,7 @@ public class VoiceRecognitionActivity extends Activity {
         setContentView(R.layout.activity_voice_recognition);
 
         Button speakButton = (Button) findViewById(R.id.speakButton);
-
-        wordsList = (ListView) findViewById(R.id.list);
+        speechTextView = (TextView) findViewById(R.id.speechTextView);
 
         // Disable button if no recognition service is present
         PackageManager pm = getPackageManager();
@@ -52,12 +53,13 @@ public class VoiceRecognitionActivity extends Activity {
 
     /**
      * Fire an intent to start the voice recognition activity.
+     *
      */
     private void startVoiceRecognitionActivity()
     {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "SAY SOMETHING!");
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Voice recognition Demo...");
         startActivityForResult(intent, REQUEST_CODE);
     }
 
@@ -69,12 +71,15 @@ public class VoiceRecognitionActivity extends Activity {
     {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK)
         {
-            // Populate the wordsList with the String values the recognition engine thought it heard
-            ArrayList<String> matches = data.getStringArrayListExtra(
-                    RecognizerIntent.EXTRA_RESULTS);
-            wordsList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
-                    matches));
+
+            matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+
+            speechTextView.append(matches.get(0));
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void resetButtonClicked(View v) {
+        speechTextView.setText("");
     }
 }
